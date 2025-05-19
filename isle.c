@@ -21,6 +21,8 @@ ISLE_Tile tileSet[MAX_TILES];
 SDL_Texture *tilePanel = NULL;
 int windowWidth = 800;
 int windowHeight = 600;
+SDL_Texture *drkcanvas = NULL;
+SDL_Texture *litcanvas = NULL;
 
 // Initialize SDL, window, and renderer.
 void initSDL() {
@@ -68,8 +70,13 @@ void SDLCALL openFileCallBack(void *userdata, const char *const *filelist, int f
 // Checks what they clicked...add as we go along
 void checkMouseClick(int x, int y) {
 	if (x >= 0 && x <= 64 && y >= 0 && y <= 32) { // Open button
-		printf("we clicked it\n");
 		SDL_ShowOpenFileDialog(openFileCallBack, NULL, NULL, NULL, NULL, NULL, 0);
+	}
+	else if (x >= 0 && x <= 200 && y >= 32 && y <= windowHeight) { // Tile panel
+		printf("we clicked panel\n");
+	}
+	else if (x >= 200 && x <= windowWidth && y >= 32 && y <= windowHeight) { // Canvas panel
+		printf("we clicked canvas\n");
 	}
 	else
 		return;
@@ -128,8 +135,35 @@ void setupTileset() {
 }
 
 void drawTileset() {
+	int y = 64;
 	for (int i = 0; i < MAX_TILES; i++) {
-		blitTile(tileSetImg, &tileSet[i].src, (i % 8) * 16 * 2, (i / 8) * 16 * 2);
+		blitTile(tileSetImg, &tileSet[i].src, (i % 6) * 32,  y + (i / 6) * 32); // scaled for 16 * 2 = 32
+	}
+}
+
+void clearCanvas() {
+	for (int y = 0; y < 13; y++) {
+		for (int x = 0; x < 15; x++) {
+			canvas[x][y] = 99;
+		}
+	}
+}
+
+void drawCanvas() {
+	SDL_FRect emptySq = { 0, 0, 32, 32 };
+	int colourChange = 1;
+	int xOffset = 250;
+	int yOffset = 64;
+	for (int y = 0; y < 13; y++) {
+		for (int x = 0; x < 15; x++) {
+			if (canvas[x][y] == 99) {
+				if ((colourChange % 2) >= 1)
+					blitTile(drkcanvas, &emptySq, x * 32 + xOffset, y * 32 + yOffset);
+				else
+					blitTile(litcanvas, &emptySq, x * 32 + xOffset, y * 32 + yOffset);
+				colourChange++;
+			}
+		}
 	}
 }
 
@@ -140,7 +174,10 @@ int main(int argc, char *args[]) {
 	tileSetImg = loadTexture("tileset.png");
 	openButton = loadTexture("gfx/open.png");
 	saveButton = loadTexture("gfx/save.png");
-	tilePanel = loadTexture("gfx/tilebg.png");
+	tilePanel = loadTexture("gfx/black.png");
+	drkcanvas = loadTexture("gfx/darkgrey.png");
+	litcanvas = loadTexture("gfx/lightgrey.png");
+	clearCanvas();
 
 	while (quit) {
 		// Input
@@ -157,6 +194,7 @@ int main(int argc, char *args[]) {
 		blitSprite(saveButton, 66, 0, 64, 32);
 		blitSprite(tilePanel, 200, 0, 2, windowHeight);
 		drawTileset();
+		drawCanvas();
 		SDL_RenderPresent(renderer);
 	}
 	return 0;
