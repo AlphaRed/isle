@@ -10,8 +10,14 @@ typedef struct ISLE_Tile {
 	SDL_FRect src;
 } ISLE_Tile;
 
-SDL_Window *window = NULL;
-SDL_Renderer *renderer = NULL;
+typedef struct ISLE_Client {
+	SDL_Window *window;
+	SDL_Renderer *renderer;
+	int windowWidth;
+	int windowHeight;
+} ISLE_Client;
+
+ISLE_Client client;
 int canvas[15][13]; // hardcoded for now
 SDL_Texture *tileSetImg = NULL;
 SDL_Texture *openButton = NULL;
@@ -19,8 +25,6 @@ SDL_Texture *saveButton = NULL;
 FILE *openFile = NULL;
 ISLE_Tile tileSet[MAX_TILES];
 SDL_Texture *tilePanel = NULL;
-int windowWidth = 800;
-int windowHeight = 600;
 SDL_Texture *drkcanvas = NULL;
 SDL_Texture *litcanvas = NULL;
 
@@ -30,14 +34,14 @@ void initSDL() {
 		printf("SDL failed to initialize: %s\n", SDL_GetError());
 	}
 	else
-		window = SDL_CreateWindow("ISLE", windowWidth, windowHeight, SDL_WINDOW_RESIZABLE);
+		client.window = SDL_CreateWindow("ISLE", client.windowWidth, client.windowHeight, SDL_WINDOW_RESIZABLE);
 
-	renderer = SDL_CreateRenderer(window, NULL);
-	if (renderer == NULL) {
+	client.renderer = SDL_CreateRenderer(client.window, NULL);
+	if (client.renderer == NULL) {
 		printf("SDL renderer failed to create: %s\n", SDL_GetError());
 	}
 	else
-		SDL_SetRenderDrawColor(renderer, 75, 75, 75, 255);
+		SDL_SetRenderDrawColor(client.renderer, 75, 75, 75, 255);
 }
 
 void SDLCALL openFileCallBack(void *userdata, const char *const *filelist, int filter) {
@@ -72,10 +76,10 @@ void checkMouseClick(int x, int y) {
 	if (x >= 0 && x <= 64 && y >= 0 && y <= 32) { // Open button
 		SDL_ShowOpenFileDialog(openFileCallBack, NULL, NULL, NULL, NULL, NULL, 0);
 	}
-	else if (x >= 0 && x <= 200 && y >= 32 && y <= windowHeight) { // Tile panel
+	else if (x >= 0 && x <= 200 && y >= 32 && y <= client.windowHeight) { // Tile panel
 		printf("we clicked panel\n");
 	}
-	else if (x >= 200 && x <= windowWidth && y >= 32 && y <= windowHeight) { // Canvas panel
+	else if (x >= 200 && x <= client.windowWidth && y >= 32 && y <= client.windowHeight) { // Canvas panel
 		printf("we clicked canvas\n");
 	}
 	else
@@ -95,7 +99,7 @@ int eventHandler(SDL_Event event) {
 
 // Loads image files as textures
 SDL_Texture *loadTexture(char *filename) {
-	SDL_Texture *returnTex = IMG_LoadTexture(renderer, filename);
+	SDL_Texture *returnTex = IMG_LoadTexture(client.renderer, filename);
 	if (!returnTex) {
 		printf("Failed to load texture: %s\n", filename);
 		returnTex = NULL;
@@ -110,7 +114,7 @@ void blitSprite(SDL_Texture *tex, float x, float y, float w, float h) {
 	dest.y = y;
 	dest.w = w;
 	dest.h = h;
-	SDL_RenderTexture(renderer, tex, NULL, &dest);
+	SDL_RenderTexture(client.renderer, tex, NULL, &dest);
 }
 
 // Blits tiles to renderer
@@ -121,7 +125,7 @@ void blitTile(SDL_Texture *tex, SDL_FRect *src, float x, float y) {
 	dest.w = TILE_SIZE * 2;
 	dest.h = TILE_SIZE * 2;
 
-	SDL_RenderTexture(renderer, tex, src, &dest);
+	SDL_RenderTexture(client.renderer, tex, src, &dest);
 }
 
 // Setup tileset
@@ -134,10 +138,9 @@ void setupTileset() {
 	}
 }
 
-void drawTileset() {
-	int y = 64;
+void drawTileset(int x, int y) {
 	for (int i = 0; i < MAX_TILES; i++) {
-		blitTile(tileSetImg, &tileSet[i].src, (i % 6) * 32,  y + (i / 6) * 32); // scaled for 16 * 2 = 32
+		blitTile(tileSetImg, &tileSet[i].src, x + (i % 5) * 32,  y + (i / 5) * 32); // scaled for 16 * 2 = 32
 	}
 }
 
@@ -167,14 +170,43 @@ void drawCanvas() {
 	}
 }
 
+void drawTilePanel(int x, int y) {
+	const int tileSize = 32;
+	SDL_FRect topLeft = { tileSize * 2, 0, tileSize, tileSize };
+	SDL_FRect topRight = { tileSize * 3, 0, tileSize, tileSize };
+	SDL_FRect horiz = { tileSize * 0, 0, tileSize, tileSize };
+	SDL_FRect vert = { tileSize * 1, 0, tileSize, tileSize };
+	SDL_FRect botLeft = { tileSize * 4, 0, tileSize, tileSize };
+	SDL_FRect botRight = { tileSize * 5, 0, tileSize, tileSize };
+	// top row
+	blitTile(tilePanel, &topLeft, x, y);
+	for (int i = 1; i < 6; i++) {
+		blitTile(tilePanel, &horiz, x + (i * tileSize), y);
+	}
+	blitTile(tilePanel, &topRight, x + (6 * tileSize), y);
+	// middle rows
+	for (int i = 1; i < 10; i++) {
+		blitTile(tilePanel, &vert, x, y + i * tileSize);
+		blitTile(tilePanel, &vert, x + 6 * tileSize, y + i * tileSize);
+	}
+	// bottom row
+	blitTile(tilePanel, &botLeft, x, y + 10 * tileSize);
+	for (int i = 1; i < 6; i++) {
+		blitTile(tilePanel, &horiz, x + (i * tileSize), y + 10 * tileSize);
+	}
+	blitTile(tilePanel, &botRight, x + (6 * tileSize), y + 10 * tileSize);
+}
+
 int main(int argc, char *args[]) {
+	client.windowWidth = 800;
+	client.windowHeight = 600;
 	initSDL();
 	int quit = 1;
 	SDL_Event events;
 	tileSetImg = loadTexture("tileset.png");
 	openButton = loadTexture("gfx/open.png");
 	saveButton = loadTexture("gfx/save.png");
-	tilePanel = loadTexture("gfx/black.png");
+	tilePanel = loadTexture("gfx/tilepanel.png");
 	drkcanvas = loadTexture("gfx/darkgrey.png");
 	litcanvas = loadTexture("gfx/lightgrey.png");
 	clearCanvas();
@@ -185,17 +217,17 @@ int main(int argc, char *args[]) {
 		quit = eventHandler(events);
 
 		// Logic
-		SDL_GetWindowSize(window, &windowWidth, &windowHeight);
+		SDL_GetWindowSize(client.window, &client.windowWidth, &client.windowHeight);
 		setupTileset();
 
 		// Render
-		SDL_RenderClear(renderer);
+		SDL_RenderClear(client.renderer);
 		blitSprite(openButton, 0, 0, 64, 32);
 		blitSprite(saveButton, 66, 0, 64, 32);
-		blitSprite(tilePanel, 200, 0, 2, windowHeight);
-		drawTileset();
+		drawTilePanel(8, 48);
+		drawTileset(8 + 32, 48 + 32);
 		drawCanvas();
-		SDL_RenderPresent(renderer);
+		SDL_RenderPresent(client.renderer);
 	}
 	return 0;
 }
