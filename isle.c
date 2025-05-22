@@ -15,6 +15,7 @@ typedef struct ISLE_Client {
 	SDL_Renderer *renderer;
 	int windowWidth;
 	int windowHeight;
+	SDL_FRect panel;
 } ISLE_Client;
 
 ISLE_Client client;
@@ -73,15 +74,16 @@ void SDLCALL openFileCallBack(void *userdata, const char *const *filelist, int f
 
 // Checks what they clicked...add as we go along
 void checkMouseClick(int x, int y) {
+	printf("mouse: (%d, %d)\n", x, y);
 	if (x >= 0 && x <= 64 && y >= 0 && y <= 32) { // Open button
 		SDL_ShowOpenFileDialog(openFileCallBack, NULL, NULL, NULL, NULL, NULL, 0);
 	}
-	else if (x >= 0 && x <= 200 && y >= 32 && y <= client.windowHeight) { // Tile panel
+	else if (x >= client.panel.x && x <= (client.panel.w + client.panel.x) && y >= client.panel.y && y <= (client.panel.h + client.panel.y)) { // Tile panel
 		printf("we clicked panel\n");
-	}
+	}/*
 	else if (x >= 200 && x <= client.windowWidth && y >= 32 && y <= client.windowHeight) { // Canvas panel
 		printf("we clicked canvas\n");
-	}
+	}*/
 	else
 		return;
 }
@@ -172,27 +174,29 @@ void drawCanvas() {
 
 void drawTilePanel(int x, int y) {
 	const int tileSize = 32;
-	SDL_FRect topLeft = { tileSize * 2, 0, tileSize, tileSize };
-	SDL_FRect topRight = { tileSize * 3, 0, tileSize, tileSize };
-	SDL_FRect horiz = { tileSize * 0, 0, tileSize, tileSize };
-	SDL_FRect vert = { tileSize * 1, 0, tileSize, tileSize };
-	SDL_FRect botLeft = { tileSize * 4, 0, tileSize, tileSize };
-	SDL_FRect botRight = { tileSize * 5, 0, tileSize, tileSize };
+	SDL_FRect topLeft = { tileSize * 0, 0, tileSize, tileSize };
+	SDL_FRect top = { tileSize * 1, 0, tileSize, tileSize };
+	SDL_FRect topRight = { tileSize * 2, 0, tileSize, tileSize };
+	SDL_FRect left = { tileSize * 3, 0, tileSize, tileSize };
+	SDL_FRect right = { tileSize * 4, 0, tileSize, tileSize };
+	SDL_FRect botLeft = { tileSize * 5, 0, tileSize, tileSize };
+	SDL_FRect bot = { tileSize * 6, 0, tileSize, tileSize };
+	SDL_FRect botRight = { tileSize * 7, 0, tileSize, tileSize };
 	// top row
 	blitTile(tilePanel, &topLeft, x, y);
 	for (int i = 1; i < 6; i++) {
-		blitTile(tilePanel, &horiz, x + (i * tileSize), y);
+		blitTile(tilePanel, &top, x + (i * tileSize), y);
 	}
 	blitTile(tilePanel, &topRight, x + (6 * tileSize), y);
 	// middle rows
 	for (int i = 1; i < 10; i++) {
-		blitTile(tilePanel, &vert, x, y + i * tileSize);
-		blitTile(tilePanel, &vert, x + 6 * tileSize, y + i * tileSize);
+		blitTile(tilePanel, &left, x, y + i * tileSize);
+		blitTile(tilePanel, &right, x + 6 * tileSize, y + i * tileSize);
 	}
 	// bottom row
 	blitTile(tilePanel, &botLeft, x, y + 10 * tileSize);
 	for (int i = 1; i < 6; i++) {
-		blitTile(tilePanel, &horiz, x + (i * tileSize), y + 10 * tileSize);
+		blitTile(tilePanel, &bot, x + (i * tileSize), y + 10 * tileSize);
 	}
 	blitTile(tilePanel, &botRight, x + (6 * tileSize), y + 10 * tileSize);
 }
@@ -200,6 +204,10 @@ void drawTilePanel(int x, int y) {
 int main(int argc, char *args[]) {
 	client.windowWidth = 800;
 	client.windowHeight = 600;
+	client.panel.x = 8;
+	client.panel.y = 48;
+	client.panel.w = 6 * 32;
+	client.panel.h = 10 * 32;
 	initSDL();
 	int quit = 1;
 	SDL_Event events;
@@ -224,7 +232,7 @@ int main(int argc, char *args[]) {
 		SDL_RenderClear(client.renderer);
 		blitSprite(openButton, 0, 0, 64, 32);
 		blitSprite(saveButton, 66, 0, 64, 32);
-		drawTilePanel(8, 48);
+		drawTilePanel(client.panel.x, client.panel.y);
 		drawTileset(8 + 32, 48 + 32);
 		drawCanvas();
 		SDL_RenderPresent(client.renderer);
