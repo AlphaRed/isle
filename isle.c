@@ -174,31 +174,32 @@ void drawCanvas() {
 
 void drawTilePanel(int x, int y) {
 	const int tileSize = 32;
-	SDL_FRect topLeft = { tileSize * 0, 0, tileSize, tileSize };
-	SDL_FRect top = { tileSize * 1, 0, tileSize, tileSize };
-	SDL_FRect topRight = { tileSize * 2, 0, tileSize, tileSize };
-	SDL_FRect left = { tileSize * 3, 0, tileSize, tileSize };
-	SDL_FRect right = { tileSize * 4, 0, tileSize, tileSize };
-	SDL_FRect botLeft = { tileSize * 5, 0, tileSize, tileSize };
-	SDL_FRect bot = { tileSize * 6, 0, tileSize, tileSize };
-	SDL_FRect botRight = { tileSize * 7, 0, tileSize, tileSize };
+	SDL_FRect sprite = { 0, 0, tileSize, tileSize };
 	// top row
-	blitTile(tilePanel, &topLeft, x, y);
+	blitTile(tilePanel, &sprite, x, y);
+	sprite.x += tileSize;
 	for (int i = 1; i < 6; i++) {
-		blitTile(tilePanel, &top, x + (i * tileSize), y);
+		blitTile(tilePanel, &sprite, x + (i * tileSize), y);
 	}
-	blitTile(tilePanel, &topRight, x + (6 * tileSize), y);
+	sprite.x += tileSize;
+	blitTile(tilePanel, &sprite, x + (6 * tileSize), y);
 	// middle rows
+	sprite.x += tileSize;
 	for (int i = 1; i < 10; i++) {
-		blitTile(tilePanel, &left, x, y + i * tileSize);
-		blitTile(tilePanel, &right, x + 6 * tileSize, y + i * tileSize);
+		blitTile(tilePanel, &sprite, x, y + i * tileSize);
+		sprite.x += tileSize;
+		blitTile(tilePanel, &sprite, x + 6 * tileSize, y + i * tileSize);
+		sprite.x -= tileSize;
 	}
 	// bottom row
-	blitTile(tilePanel, &botLeft, x, y + 10 * tileSize);
+	sprite.x += tileSize * 2;
+	blitTile(tilePanel, &sprite, x, y + 10 * tileSize);
+	sprite.x += tileSize;
 	for (int i = 1; i < 6; i++) {
-		blitTile(tilePanel, &bot, x + (i * tileSize), y + 10 * tileSize);
+		blitTile(tilePanel, &sprite, x + (i * tileSize), y + 10 * tileSize);
 	}
-	blitTile(tilePanel, &botRight, x + (6 * tileSize), y + 10 * tileSize);
+	sprite.x += tileSize;
+	blitTile(tilePanel, &sprite, x + (6 * tileSize), y + 10 * tileSize);
 }
 
 int main(int argc, char *args[]) {
