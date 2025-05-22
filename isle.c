@@ -16,10 +16,11 @@ typedef struct ISLE_Client {
 	int windowWidth;
 	int windowHeight;
 	SDL_FRect panel;
+	SDL_FRect canvas;
 } ISLE_Client;
 
 ISLE_Client client;
-int canvas[15][13]; // hardcoded for now
+int canvasData[15][13]; // hardcoded for now
 SDL_Texture *tileSetImg = NULL;
 SDL_Texture *openButton = NULL;
 SDL_Texture *saveButton = NULL;
@@ -64,7 +65,7 @@ void SDLCALL openFileCallBack(void *userdata, const char *const *filelist, int f
 		{
 			for (int x = 0; x < 15; x++)
 			{
-				if (fscanf(openFile, "%d", &canvas[x][y]) == EOF)
+				if (fscanf(openFile, "%d", &canvasData[x][y]) == EOF)
 					return 1;
 			}
 		}
@@ -80,10 +81,10 @@ void checkMouseClick(int x, int y) {
 	}
 	else if (x >= client.panel.x && x <= (client.panel.w + client.panel.x) && y >= client.panel.y && y <= (client.panel.h + client.panel.y)) { // Tile panel
 		printf("we clicked panel\n");
-	}/*
-	else if (x >= 200 && x <= client.windowWidth && y >= 32 && y <= client.windowHeight) { // Canvas panel
+	}
+	else if (x >= client.canvas.x && x <= (client.canvas.w + client.canvas.x) && y >= client.canvas.y && y <= (client.canvas.h + client.canvas.y)) { // Canvas panel
 		printf("we clicked canvas\n");
-	}*/
+	}
 	else
 		return;
 }
@@ -149,19 +150,17 @@ void drawTileset(int x, int y) {
 void clearCanvas() {
 	for (int y = 0; y < 13; y++) {
 		for (int x = 0; x < 15; x++) {
-			canvas[x][y] = 99;
+			canvasData[x][y] = 99;
 		}
 	}
 }
 
-void drawCanvas() {
+void drawCanvas(int xOffset, int yOffset) {
 	SDL_FRect emptySq = { 0, 0, 32, 32 };
 	int colourChange = 1;
-	int xOffset = 250;
-	int yOffset = 64;
 	for (int y = 0; y < 13; y++) {
 		for (int x = 0; x < 15; x++) {
-			if (canvas[x][y] == 99) {
+			if (canvasData[x][y] == 99) {
 				if ((colourChange % 2) >= 1)
 					blitTile(drkcanvas, &emptySq, x * 32 + xOffset, y * 32 + yOffset);
 				else
@@ -203,12 +202,17 @@ void drawTilePanel(int x, int y) {
 }
 
 int main(int argc, char *args[]) {
+	// need a better way to do this
 	client.windowWidth = 800;
 	client.windowHeight = 600;
 	client.panel.x = 8;
 	client.panel.y = 48;
 	client.panel.w = 6 * 32;
 	client.panel.h = 10 * 32;
+	client.canvas.x = 250;
+	client.canvas.y = 64;
+	client.canvas.w = 15 * 32;
+	client.canvas.h = 13 * 32;
 	initSDL();
 	int quit = 1;
 	SDL_Event events;
@@ -235,7 +239,7 @@ int main(int argc, char *args[]) {
 		blitSprite(saveButton, 66, 0, 64, 32);
 		drawTilePanel(client.panel.x, client.panel.y);
 		drawTileset(8 + 32, 48 + 32);
-		drawCanvas();
+		drawCanvas(client.canvas.x, client.canvas.y);
 		SDL_RenderPresent(client.renderer);
 	}
 	return 0;
