@@ -29,6 +29,7 @@ ISLE_Tile tileSet[MAX_TILES];
 SDL_Texture *tilePanel = NULL;
 SDL_Texture *drkcanvas = NULL;
 SDL_Texture *litcanvas = NULL;
+SDL_Texture *bg = NULL;
 
 // Initialize SDL, window, and renderer.
 void initSDL() {
@@ -167,6 +168,11 @@ void drawCanvas(int xOffset, int yOffset) {
 					blitTile(litcanvas, &emptySq, x * 32 + xOffset, y * 32 + yOffset);
 				colourChange++;
 			}
+			else if (canvasData[x][y] == 0) {
+				blitTile(bg, &emptySq, x * 32 + xOffset, y * 32 + yOffset);
+			}
+			else
+				blitTile(tileSetImg, &tileSet[canvasData[x][y]].src, x * 32 + xOffset, y * 32 + yOffset);
 		}
 	}
 }
@@ -222,6 +228,7 @@ int main(int argc, char *args[]) {
 	tilePanel = loadTexture("gfx/tilepanel.png");
 	drkcanvas = loadTexture("gfx/darkgrey.png");
 	litcanvas = loadTexture("gfx/lightgrey.png");
+	bg = loadTexture("gfx/bg.png");
 	clearCanvas();
 
 	while (quit) {
