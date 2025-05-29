@@ -1,23 +1,4 @@
-#include <stdio.h>
-#include <SDL3/SDL.h>
-#include <SDL3_image/SDL_image.h>
-
-#define MAX_CANVAS_SIZE 99
-#define MAX_TILES		64 // for now (8 x 8)
-#define TILE_SIZE		16
-
-typedef struct ISLE_Tile {
-	SDL_FRect src;
-} ISLE_Tile;
-
-typedef struct ISLE_Client {
-	SDL_Window *window;
-	SDL_Renderer *renderer;
-	int windowWidth;
-	int windowHeight;
-	SDL_FRect panel;
-	SDL_FRect canvas;
-} ISLE_Client;
+#include "common.h"
 
 ISLE_Client client;
 int canvasData[15][13]; // hardcoded for now
@@ -30,6 +11,7 @@ SDL_Texture *tilePanel = NULL;
 SDL_Texture *drkcanvas = NULL;
 SDL_Texture *litcanvas = NULL;
 SDL_Texture *bg = NULL;
+SDL_Texture *select = NULL;
 
 // Initialize SDL, window, and renderer.
 void initSDL() {
@@ -219,6 +201,10 @@ int main(int argc, char *args[]) {
 	client.canvas.y = 64;
 	client.canvas.w = 15 * 32;
 	client.canvas.h = 13 * 32;
+	client.tileIcon.x = 8 + 32;
+	client.tileIcon.y = 48 + 32;
+	client.tileIcon.w = 32;
+	client.tileIcon.h = 32;
 	initSDL();
 	int quit = 1;
 	SDL_Event events;
@@ -229,6 +215,7 @@ int main(int argc, char *args[]) {
 	drkcanvas = loadTexture("gfx/darkgrey.png");
 	litcanvas = loadTexture("gfx/lightgrey.png");
 	bg = loadTexture("gfx/bg.png");
+	select = loadTexture("gfx/select.png");
 	clearCanvas();
 
 	while (quit) {
@@ -246,6 +233,7 @@ int main(int argc, char *args[]) {
 		blitSprite(saveButton, 66, 0, 64, 32);
 		drawTilePanel(client.panel.x, client.panel.y);
 		drawTileset(8 + 32, 48 + 32);
+		blitSprite(select, client.tileIcon.x, client.tileIcon.y, client.tileIcon.w, client.tileIcon.h);
 		drawCanvas(client.canvas.x, client.canvas.y);
 		SDL_RenderPresent(client.renderer);
 	}
