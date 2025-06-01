@@ -23,4 +23,9 @@ typedef struct ISLE_Client {
 	SDL_FRect tileIcon;
 } ISLE_Client;
 
+extern ISLE_Client client;
+extern FILE *openFile;
+extern int canvasData[15][13];
+extern ISLE_Tile tileSet[MAX_TILES];
+
 #endif
