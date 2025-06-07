@@ -13,7 +13,10 @@ void checkMouseClick(int x, int y) {
 		SDL_ShowOpenFileDialog(openFileCallBack, NULL, NULL, NULL, NULL, NULL, 0);
 	}
 	else if (x >= client.panel.x && x <= (client.panel.w + client.panel.x) && y >= client.panel.y && y <= (client.panel.h + client.panel.y)) { // Tile panel
-		printf("we clicked panel\n");
+		int tileX = (x - 8 - 3) / (TILE_SIZE * 2);
+		int tileY = (y - 48 - 3) / (TILE_SIZE * 2);
+		client.selectedTile = tileX + (tileY * 5);
+		//printf("we clicked panel: %d, %d\n", tileX, tileY);
 	}
 	else if (x >= client.canvas.x && x <= (client.canvas.w + client.canvas.x) && y >= client.canvas.y && y <= (client.canvas.h + client.canvas.y)) { // Canvas panel
 		printf("we clicked canvas\n");
@@ -73,8 +76,8 @@ int main(int argc, char *args[]) {
 		SDL_RenderClear(client.renderer);
 		drawButtons();
 		drawTilePanel(client.panel.x, client.panel.y);
-		drawTileset(8 + 32, 48 + 32);
-		drawTileSelect();
+		drawTileset(8 + 3, 48 + 3);
+		drawTileSelect(client.selectedTile);
 		drawCanvas(client.canvas.x, client.canvas.y);
 		SDL_RenderPresent(client.renderer);
 	}

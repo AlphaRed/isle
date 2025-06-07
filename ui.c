@@ -121,7 +121,7 @@ void drawCanvas(int xOffset, int yOffset) {
 // Draws tileset to the sidebar
 void drawTileset(int x, int y) {
 	for (int i = 0; i < MAX_TILES; i++) {
-		blitTile(tileSetImg, &tileSet[i].src, x + (i % 5) * 32, y + (i / 5) * 32); // scaled for 16 * 2 = 32
+		blitTile(tileSetImg, &tileSet[i].src, x + (i % 5) * TILE_SIZE * 2, y + (i / 5) * TILE_SIZE * 2); // scaled for 16 * 2 = 32
 	}
 }
 
@@ -163,8 +163,10 @@ void drawTilePanel(int x, int y) {
 }
 
 // Draw tileset select "cursor"
-void drawTileSelect() {
-	blitSprite(select, client.tileIcon.x, client.tileIcon.y, client.tileIcon.w, client.tileIcon.h);
+void drawTileSelect(int tileNum) {
+	int x = (tileNum % 5) * (TILE_SIZE * 2) + (8 + 3);
+	int y = (tileNum / 5) * (TILE_SIZE * 2) + (48 + 3);
+	blitSprite(select, x, y, TILE_SIZE * 2, TILE_SIZE * 2);
 }
 
 // Setup UI defaults
@@ -179,8 +181,5 @@ void setupUI() {
 	client.canvas.y = 64;
 	client.canvas.w = 15 * 32;
 	client.canvas.h = 13 * 32;
-	client.tileIcon.x = 8 + 32;
-	client.tileIcon.y = 48 + 32;
-	client.tileIcon.w = 32;
-	client.tileIcon.h = 32;
+	client.selectedTile = 0;
 }

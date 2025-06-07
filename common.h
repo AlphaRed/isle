@@ -20,7 +20,7 @@ typedef struct ISLE_Client {
 	int windowHeight;
 	SDL_FRect panel;
 	SDL_FRect canvas;
-	SDL_FRect tileIcon;
+	int selectedTile;
 } ISLE_Client;
 
 extern ISLE_Client client;
