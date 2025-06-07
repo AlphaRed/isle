@@ -161,3 +161,26 @@ void drawTilePanel(int x, int y) {
 	sprite.x += tileSize;
 	blitTile(tilePanel, &sprite, x + (6 * tileSize), y + 10 * tileSize);
 }
+
+// Draw tileset select "cursor"
+void drawTileSelect() {
+	blitSprite(select, client.tileIcon.x, client.tileIcon.y, client.tileIcon.w, client.tileIcon.h);
+}
+
+// Setup UI defaults
+void setupUI() {
+	client.windowWidth = 800;
+	client.windowHeight = 600;
+	client.panel.x = 8;
+	client.panel.y = 48;
+	client.panel.w = 6 * 32;
+	client.panel.h = 10 * 32;
+	client.canvas.x = 250;
+	client.canvas.y = 64;
+	client.canvas.w = 15 * 32;
+	client.canvas.h = 13 * 32;
+	client.tileIcon.x = 8 + 32;
+	client.tileIcon.y = 48 + 32;
+	client.tileIcon.w = 32;
+	client.tileIcon.h = 32;
+}

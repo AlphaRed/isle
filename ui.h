@@ -11,5 +11,7 @@ void drawCanvas(int xOffset, int yOffset);
 void drawTileset(int x, int y);
 void drawButtons();
 void drawTilePanel(int x, int y);
+void drawTileSelect();
+void setupUI();
 
 #endif

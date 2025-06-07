@@ -52,21 +52,8 @@ void clearCanvas() {
 }
 
 int main(int argc, char *args[]) {
-	// need a better way to do this
-	client.windowWidth = 800;
-	client.windowHeight = 600;
-	client.panel.x = 8;
-	client.panel.y = 48;
-	client.panel.w = 6 * 32;
-	client.panel.h = 10 * 32;
-	client.canvas.x = 250;
-	client.canvas.y = 64;
-	client.canvas.w = 15 * 32;
-	client.canvas.h = 13 * 32;
-	client.tileIcon.x = 8 + 32;
-	client.tileIcon.y = 48 + 32;
-	client.tileIcon.w = 32;
-	client.tileIcon.h = 32;
+	// need a better way to do this, move to a function in ui.c
+	setupUI();
 	initSDL();
 	int quit = 1;
 	SDL_Event events;
@@ -87,7 +74,7 @@ int main(int argc, char *args[]) {
 		drawButtons();
 		drawTilePanel(client.panel.x, client.panel.y);
 		drawTileset(8 + 32, 48 + 32);
-		//blitSprite(select, client.tileIcon.x, client.tileIcon.y, client.tileIcon.w, client.tileIcon.h);
+		drawTileSelect();
 		drawCanvas(client.canvas.x, client.canvas.y);
 		SDL_RenderPresent(client.renderer);
 	}
